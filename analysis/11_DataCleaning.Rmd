@@ -1,0 +1,75 @@
+---
+title: "Cleaning Data"
+output: html_document
+date: "2025-11-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Using our 00_requirements.R we will load in all needed packages.
+```{r setup}
+source(here::here("00_requirements.R"))
+```
+
+
+
+Load in the CSV file via url from GitHub Repository.
+
+```{r}
+raw_data <- read.csv("https://raw.githubusercontent.com/dawobarrel/STAT107_Group25_Repository/refs/heads/main/data/data/nba2024.csv?token=GHSAT0AAAAAADOKOXV3YKF2TENGYUMCZULE2IOTSSQ")
+
+```
+
+Despite data already being cleaned we will be double checking by getting rid of any missing values and duplicates.
+One thing to note in our dataset is that instead of for example 3 Pointer percantage being labeled 3P% it is labeled as "3P." So for readibility we will convert these to "3P_pct"
+
+```{r}
+clean_data <- raw_data %>%
+  rename(
+    X3P_pct = X3P.,
+    X2P_pct = X2P.,
+    FG_pct = FG.,
+    FT_pct = FT.
+  )
+
+
+```
+
+
+Now we will be double checking to make sure that our data set is ready to use for analysis.
+
+
+Checking for missing values.
+
+```{r}
+# Total missing values
+sum(is.na(clean_data))
+
+# Missing values by column
+colSums(is.na(clean_data))
+```
+
+The 76 Missing values as shown in the colSums output are not actually from missing data but from the calculation of percentages of statistics such as 3Pointers, as if a player has made 0 3Pointers the 3Pointer percentage would be nullas a result as there is no data to calculate this percentage resulting in these missing values. 
+
+Checking for duplicate rows.
+```{r}
+# Count duplicate rows
+sum(duplicated(clean_data))
+```
+
+Checking summary of statistics usin
+
+```{r}
+# Full summary of numerical variables
+skimr::skim(clean_data)
+```
+
+Now that we have processed our dataset for better readability and have checked to make sure it is properly cleaned and ready for further analysis we save it so we can load it in later scripts.
+```{r}
+save(clean_data, file = here::here("data", "nba2024_cleaned.RData"))
+```
+
+
