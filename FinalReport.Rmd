@@ -1,0 +1,26 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+" Title and Abstract: Give a title to your project. Then, in an abstract of 200 words or less, describe what is the main question you aimed to answer, and a brief summary of your conclusions."
+```
+
+```{r}
+"• Introduction: What is the purpose of the analysis? What is the question that you are trying to answer with this analysis? Who may this analysis benefit? Are you trying to train a model, test a hypothesis, classify objects apart? Why?"
+```
+
+```{r}
+"• Data: What is the data available for performing the analysis? Where did you retrieve the data from? What are the variables and number of observations available? What steps where performed to clean the data? Will the data be generated through a randomized simulation?"
+```
+
+
+```{r}
+"• Visualization: Provide preliminary visualization in the form of histograms, density plots, scatter plots, box-plots, and numerical summaries of the data, depending on the type of analysis. What do these visualizations suggest about the hypothesis, model or simulation you are aiming to perform? If you are interested in including further visualization, describe them here."
+```
+
+
+```{r}
+"• Analysis: Provide some preliminary plans of what analysis you aim to complete. Mention models, tests, procedures, and some ideas of what expected outcomes you hope to find."
+```
