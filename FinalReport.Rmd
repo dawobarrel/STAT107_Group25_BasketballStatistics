@@ -10,17 +10,42 @@ date: "2025-11-08"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
- Title and Abstract: Give a title to your project. Then, in an abstract of 200 words or less, describe what is the main question you aimed to answer, and a brief summary of your conclusions.
+ Title and Abstract: 
+
+Analysis of 2024 NBA Player Statistics Using R
+
+This project investigates NBA player performance during the 2024 season using statistical tools in R. Our primary goal is to understand which player statistics are most strongly associated with high scoring performance, overall efficiency, and player value. We also examine patterns and distributions across common metrics such as points, rebounds, assists, and shooting percentages to identify broader trends in league-wide performance.
+
+Using the dataset nba2024.csv, which contains full-season statistics for all active players, we performed data cleaning, exploratory visualization, and preliminary statistical modeling. Our analysis highlights clear relationships between scoring and usage rates, efficiency measures such as True Shooting Percentage, and positional differences across the league. Initial results suggest that player efficiency metrics explain scoring performance better than traditional box score statistics alone.
+
+These findings lay the foundation for more advanced modeling, including regression-based prediction of scoring output and potential clustering of players by archetype. This work benefits analysts, coaches, and fans interested in understanding what drives on-court performance in the modern NBA.
 
 
-• Introduction: What is the purpose of the analysis? What is the question that you are trying to answer with this analysis? Who may this analysis benefit? Are you trying to train a model, test a hypothesis, classify objects apart? Why?
+• Introduction:
+The purpose of this analysis is to explore and better understand the statistical drivers of player performance in the NBA during the 2024 season. Our central question is:
+“Which player statistics most strongly influence scoring and overall efficiency?”
 
+This analysis benefits basketball analysts, coaches, fantasy basketball participants, and anyone interested in data-driven sports insights. While we are not yet training a full predictive model, we are preparing the foundation for statistical modeling by examining variable behavior, relationships, and distribution patterns across the league. Through this project, we aim to identify meaningful performance trends and generate hypotheses for future modeling work, such as predicting high-value players.
 
-• Data: What is the data available for performing the analysis? Where did you retrieve the data from? What are the variables and number of observations available? What steps where performed to clean the data? Will the data be generated through a randomized simulation?
+• Data:
+Our analysis uses the dataset nba2024.csv, which contains full-season statistics for NBA players during the 2024 season. The dataset includes variables such as points per game, rebounds, assists, minutes played, field goal percentage, three-point percentage, and advanced metrics where available. These data were retrieved from publicly available NBA statistics sources and compiled into a cleaned .csv file for the project.
+
+To prepare the dataset, we removed players with missing or incomplete statistical entries, standardized variable formats, and ensured that numeric fields were correctly encoded. No simulated data were used; the analysis is entirely based on real-world NBA statistics.
 
 
 • Visualization: Provide preliminary visualization in the form of histograms, density plots, scatter plots, box-plots, and numerical summaries of the data, depending on the type of analysis. What do these visualizations suggest about the hypothesis, model or simulation you are aiming to perform? If you are interested in including further visualization, describe them here.
 
 
 
-• Analysis: Provide some preliminary plans of what analysis you aim to complete. Mention models, tests, procedures, and some ideas of what expected outcomes you hope to find.
+• Analysis: 
+Our planned analysis will use statistical models and basic tests to explore the relationships seen in the visualizations. Specifically, we will:
+
+Use correlation analysis to check how scoring relates to efficiency metrics
+
+Build linear regression models to predict points based on traditional and advanced statistics
+
+Explore clustering to group players by playstyle or statistical profile
+
+Compare performance across positions or roles (e.g., starters vs. bench players)
+
+We expect to find strong links between scoring and factors like minutes played, usage rate, and efficiency. Regression models should show that advanced efficiency metrics help explain scoring better than traditional box score stats alone. These analyses will guide the final modeling and insights in the full report.
