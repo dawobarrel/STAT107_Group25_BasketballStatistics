@@ -46,15 +46,6 @@ barplot(avg_pts$PTS,
         col = "steelblue",
         main = "Average Points Per Game by Team")
 ```
-```{r}
-top_scorers <- nba[order(-nba$PTS), ][1:20, ]
-
-barplot(top_scorers$PTS,
-        names.arg = top_scorers$Player,
-        las = 2,
-        col = "red",
-        main = "Top 20 Scorers")
-```
 
 ```{r}
 plot(density(nba$PTS, na.rm = TRUE),
