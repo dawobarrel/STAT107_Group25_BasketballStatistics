@@ -1,0 +1,65 @@
+---
+title: "visualizations"
+output: html_document
+date: "2025-11-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+nba <- nba2024
+```
+
+```{r}
+hist(nba$PTS,
+     main = "Distribution of Points Per Game",
+     xlab = "PTS",
+     col = "lightblue",
+     border = "white")
+```
+```{r}
+boxplot(PTS ~ Pos,
+        data = nba,
+        main = "Points Per Game by Position",
+        xlab = "Position",
+        ylab = "PTS",
+        col = "lightgreen")
+```
+
+```{r}
+plot(nba$MP, nba$PTS,
+     main = "Minutes Played vs Points Per Game",
+     xlab = "Minutes Played (MP)",
+     ylab = "Points (PTS)",
+     pch = 19,
+     col = "darkorange")
+```
+
+```{r}
+avg_pts <- aggregate(PTS ~ Tm, data = nba, mean)
+
+barplot(avg_pts$PTS,
+        names.arg = avg_pts$Tm,
+        las = 2,
+        col = "steelblue",
+        main = "Average Points Per Game by Team")
+```
+```{r}
+top_scorers <- nba[order(-nba$PTS), ][1:20, ]
+
+barplot(top_scorers$PTS,
+        names.arg = top_scorers$Player,
+        las = 2,
+        col = "red",
+        main = "Top 20 Scorers")
+```
+
+```{r}
+plot(density(nba$PTS, na.rm = TRUE),
+     main = "Density of Points Per Game",
+     xlab = "PTS")
+```
+
+
