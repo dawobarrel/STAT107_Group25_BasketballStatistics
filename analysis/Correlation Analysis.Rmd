@@ -15,3 +15,67 @@ library(here)
 load(here::here("data", "nba2024_cleaned.RData"))
 ```
 
+We first take a quick look at the structure of our cleaned dataset.
+
+```{r}
+dim(clean_data)
+names(clean_data)
+str(clean_data)
+```
+
+We will now select the variables of interest we would like to explore. To reduce visual clutter and multicollinearity, variables that were highly redundant or not performance-based were removed from the correlation analysis. Offensive and defensive rebounding metrics were replaced by total rebounds, individual shot types were summarized by total field goal attempts, and only two efficiency metrics were retained (FG% and eFG%)
+
+```{r}
+# Variables we want to examine (edit names as needed)
+vars <- c(
+  # Performance
+  "PTS", "TRB", "AST", "STL", "BLK", "TOV", "PF", 
+  
+  # Volume
+  "MP", "FGA", "FTA",
+  
+  # Efficiency 
+  "FG_pct", "X3P_pct", "X2P_pct", "FT_pct", "eFG.",
+  
+  # Age(While not a performance statistics, would still like to explore if there is any correlation between increasing age with these other variables)
+  "Age"
+)
+```
+
+
+
+
+We now will subset these variables of interest and ensure that we only keep numeric columns so that it is ready to compute a correlation matrix.
+```{r}
+stats <- clean_data[ , vars, drop = FALSE]
+
+is_num <- sapply(stats, is.numeric)
+stats_num <- stats[ , is_num, drop = FALSE]
+str(stats_num)
+```
+
+We then compute the correlation matrix for these selected variables.
+```{r}
+cor_mat <- cor(stats_num, use = "pairwise.complete.obs")
+round(cor_mat, 2)
+```
+Using corrplot we will create a correlation heatmap for the selected variables of interest.
+
+```{r corrplot-visual, fig.width=10, fig.height=10}
+corrplot(
+  cor_mat,
+  method = "circle",      # color tiles
+  type   = "upper",      # show upper triangle only
+  order  = "hclust",     # cluster similar variables
+  addCoef.col = "black", # add correlation coefficients
+  tl.cex = 0.8           # label size
+)
+```
+
+The Figure above shows a correlation heatmap for the selected performance variables.  
+ As expected, points per game (PTS) exhibits a strong positive correlation with field-goal attempts (FGA) and free-throw attempts (FTA), reflecting that higher-volume shooters score more.  
+ Total rebounds (TRB) are positively associated with blocks (BLK), consistent with the idea that rim-protecting players also secure more rebounds.  
+ Assists (AST) show moderate positive relationships with both minutes played (MP) and points (PTS), indicating that playmaking tends to be concentrated among high-usage players.  
+ In contrast, turnovers (TOV) are positively correlated with both PTS and AST, suggesting that players who handle the ball more often both create more offense and commit more turnovers.
+An interesting correlation to note is the lack of correlation between age and other variables. Indicating that increasing age in NBA players doesn't have any negative relationships with their performances which explains how players such as Lebron James are still so dominant despite being 40 years old.
+
