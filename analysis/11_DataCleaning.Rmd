@@ -19,7 +19,7 @@ source(here::here("00_requirements.R"))
 Load in the CSV file via url from GitHub Repository.
 
 ```{r}
-raw_data <- read.csv("https://raw.githubusercontent.com/dawobarrel/STAT107_Group25_Repository/refs/heads/main/data/data/nba2024.csv?token=GHSAT0AAAAAADOKOXV3YKF2TENGYUMCZULE2IOTSSQ")
+raw_data <- read.csv("https://raw.githubusercontent.com/dawobarrel/STAT107_Group25_BasketballStatistics/refs/heads/main/data/nba2024.csv")
 
 ```
 
@@ -56,6 +56,11 @@ keep <- (!has_total) | is_total
 clean_data <- clean_data[keep, ]
 ```
 
+To reduce instability in per game averages and remove fringe participants, we restricted the sample to players with at least 20 games played, consistent with common sports analytics practice
+
+```{r}
+clean_data <- clean_data[clean_data$G >= 20, ]
+```
 
 Now we will be double checking to make sure that our data set is ready to use for analysis.
 
@@ -70,7 +75,7 @@ sum(is.na(clean_data))
 colSums(is.na(clean_data))
 ```
 
-The 64 Missing values as shown in the colSums output are not actually from missing data but from the calculation of percentages of statistics such as 3Pointers, as if a player has made 0 3Pointers the 3Pointer percentage would be nullas a result as there is no data to calculate this percentage resulting in these missing values. 
+The 44 Missing values as shown in the colSums output are not actually from missing data but from the calculation of percentages of statistics such as 3Pointers, as if a player has made 0 3Pointers the 3Pointer percentage would be nullas a result as there is no data to calculate this percentage resulting in these missing values. 
 
 Checking for duplicate rows.
 ```{r}
