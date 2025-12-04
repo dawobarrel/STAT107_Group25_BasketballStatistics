@@ -38,6 +38,24 @@ clean_data <- raw_data %>%
 
 ```
 
+Throughout the NBA season certain players may have been traded to different teams, leading to our data set having saved the stats of such players under each individual team they had played for during the season. For our analysis we will be looking at the total stats of each player, so if a player had played for multiple teams we will be removing the stats they had accumulated for each individual team and leave only their total total stats throughout the season regardless of team played for.
+
+```{r}
+# Identify total rows such as 2TM, 3TM.
+is_total <- grepl("^[0-9]TM$", clean_data$Team)
+
+# Check if each player has at least one total row
+has_total <- ave(is_total, clean_data$Player, FUN = any)
+
+# Keep either:
+# - total rows, OR
+# - rows for players who do NOT have a total row
+keep <- (!has_total) | is_total
+
+# Overwrite clean_data
+clean_data <- clean_data[keep, ]
+```
+
 
 Now we will be double checking to make sure that our data set is ready to use for analysis.
 
@@ -52,7 +70,7 @@ sum(is.na(clean_data))
 colSums(is.na(clean_data))
 ```
 
-The 76 Missing values as shown in the colSums output are not actually from missing data but from the calculation of percentages of statistics such as 3Pointers, as if a player has made 0 3Pointers the 3Pointer percentage would be nullas a result as there is no data to calculate this percentage resulting in these missing values. 
+The 64 Missing values as shown in the colSums output are not actually from missing data but from the calculation of percentages of statistics such as 3Pointers, as if a player has made 0 3Pointers the 3Pointer percentage would be nullas a result as there is no data to calculate this percentage resulting in these missing values. 
 
 Checking for duplicate rows.
 ```{r}
