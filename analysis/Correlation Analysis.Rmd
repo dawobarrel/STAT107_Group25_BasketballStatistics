@@ -6,6 +6,7 @@ output:
 ---
 
 We will begin our analysis of the 2024 NBA player statistics by exploring the correlation among the variables we have within this data set.
+Correlation analysis helps us see which statistics tend to move together and which ones behave independently. This gives us a clearer picture of how different parts of a player’s game relate to one another and helps identify which variables might be redundant or telling the same story.
 
 
 We begin by loading in our cleaned dataset that we have saved within our repository.
@@ -79,12 +80,18 @@ corrplot(
 )
 ```
 
-The Figure above shows a correlation heatmap for the selected performance variables.  
- As expected, points per game (PTS) exhibits a strong positive correlation with field-goal attempts (FGA) and free-throw attempts (FTA), reflecting that higher-volume shooters score more.  
- Total rebounds (TRB) are positively associated with blocks (BLK), consistent with the idea that rim-protecting players also secure more rebounds.  
- Assists (AST) show moderate positive relationships with both minutes played (MP) and points (PTS), indicating that playmaking tends to be concentrated among high-usage players.  
- In contrast, turnovers (TOV) are positively correlated with both PTS and AST, suggesting that players who handle the ball more often both create more offense and commit more turnovers.
-An interesting correlation to note is the lack of correlation between age and other variables. Indicating that increasing age in NBA players doesn't have any negative relationships with their performances which explains how players such as Lebron James are still so dominant despite being 40 years old.
+Correlation Heatmap:
+The correlation heatmap gives a quick visual summary of how the main performance stats relate to each other. Larger, darker circles show stronger relationships.
+A few patterns stand out:
+Scoring and shooting volume go together.
+Points (PTS) are very closely tied to field-goal attempts (FGA) and free-throw attempts (FTA). This makes sense as players who take more shots usually score more.
+Rebounding and blocking are connected.
+Total rebounds (TRB) and blocks (BLK) show a strong positive relationship, showing that interior players tend to contribute in both areas.
+Assists (AST) and turnovers (TOV) rise together. Players who handle the ball more create more plays but also commit more turnovers.
+Efficiency stats cluster together.
+FG%, eFG%, and 2-point percentage are all closely related, which is expected since they measure similar aspects of shooting ability.
+Age has almost no strong correlations with the other variables. This supports the idea that older players can still perform at a high level such as Lebron James as seen in the league today.
+Overall, the heatmap helps us see how NBA stats naturally group together: usage stats (PTS, FGA, AST, TOV) form one cluster, interior stats (TRB, BLK) form another, and shooting efficiency stands on its own.
 
 ```{r pair-plots, fig.width=10, fig.height=10}
 
@@ -112,7 +119,25 @@ pair_vars <- intersect(pair_vars, colnames(stats_num))  # safety check
     )
 ```
 
-
+Pair Plots (ggpairs):
+The pair plots  let us zoom in on each pair of variables and see the actual scatter of points, along with simple correlations.
+What we learn from these visuals:
+Higher scorers tend to be more efficient.
+PTS has a positive relationship with both FG% and eFG%. While high scorers shoot more, many also shoot efficiently.
+Rebounders tend to block more shots.
+The TRB–BLK scatterplot shows a clear upward trend, again highlighting the role of interior players.
+Turnovers rise with involvement.
+Players who score more, pass more, or play more minutes also turn the ball over more. This reflects how much they handle the ball.
+Stat distributions are skewed.
+The density curves show that only a small number of players get very high numbers in stats like PTS, AST, and BLK, which matches what we see in real NBA performance.
 
  
+
+Overall Takeaways:
+
+These visualizations help us quickly understand how NBA player stats relate to each other:
+Usage-heavy players accumulate both high positive (PTS, AST) and negative (TOV) stats.
+Interior players stand out in TRB and BLK.
+Shooting efficiency forms its own separate group.
+Age doesn’t strongly shape performance in this dataset.
 
