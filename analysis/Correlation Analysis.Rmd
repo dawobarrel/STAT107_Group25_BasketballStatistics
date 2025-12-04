@@ -1,6 +1,8 @@
 ---
 title: "Correlation Analysis"
-output: html_notebook
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 We will begin our analysis of the 2024 NBA player statistics by exploring the correlation among the variables we have within this data set.
@@ -13,7 +15,12 @@ library(here)
 
 # Load cleaned dataset
 load(here::here("data", "nba2024_cleaned.RData"))
+
+# Load required libraries
+source(here::here("00_requirements.R"))
 ```
+
+
 
 We first take a quick look at the structure of our cleaned dataset.
 
@@ -78,4 +85,34 @@ The Figure above shows a correlation heatmap for the selected performance variab
  Assists (AST) show moderate positive relationships with both minutes played (MP) and points (PTS), indicating that playmaking tends to be concentrated among high-usage players.  
  In contrast, turnovers (TOV) are positively correlated with both PTS and AST, suggesting that players who handle the ball more often both create more offense and commit more turnovers.
 An interesting correlation to note is the lack of correlation between age and other variables. Indicating that increasing age in NBA players doesn't have any negative relationships with their performances which explains how players such as Lebron James are still so dominant despite being 40 years old.
+
+```{r pair-plots, fig.width=10, fig.height=10}
+
+
+
+pair_vars <- c(
+  "PTS",     # Scoring
+  "AST",     # Playmaking
+  "TRB",     # Rebounding
+  "STL",     # On-ball defense
+  "BLK",     # Rim defense
+  "FG_pct",  # Shooting efficiency
+  "eFG.",    # Adjusted efficiency
+  "TOV"      # Turn overs
+)
+
+pair_vars <- intersect(pair_vars, colnames(stats_num))  # safety check
+
+```
+
+```{r, warning=FALSE, message=FALSE}
+    ggpairs(
+      stats_num[ , pair_vars, drop = FALSE],
+      progress = FALSE
+    )
+```
+
+
+
+ 
 
