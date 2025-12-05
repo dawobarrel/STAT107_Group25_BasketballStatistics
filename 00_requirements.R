@@ -89,6 +89,11 @@ if (!require(MASS)) {
   library(MASS)
 }
 
+# Multinomial logistic regression (multinom)
+if (!require(nnet)) {
+  install.packages("nnet")
+  library(nnet)
+}
 # ---------------------------
 # Reporting / R Markdown
 # ---------------------------

@@ -107,11 +107,130 @@ The residuals vs leverage plot identifies a few influential cases, which is expe
 The diagnostic plots indicate that the assumptions of linear regression are reasonably satisfied. The residuals show no major nonlinear patterns, residual variance appears relatively constant, and residuals are approximately normally distributed. A few influential observations appear in the leverage plot, which is expected due to the presence of high-usage superstar players, but they do not distort the model. Overall, the model is statistically sound and provides meaningful insights into the predictors of scoring when shot volume is intentionally excluded.
 
 
-Within our data set we include data on the overall rankings of players throughout the 2024-2025 Season. Using ordered logistic regression we will look to see if we can accurately predict the ranking of players through their stats.
+Within our data set we include data on the overall rankings of players throughout the 2024-2025 Season. We will first look to see if we can accurately predict the numerical ranking of players using a linear regression model.
+
+We begin by creating a 80/20 Split to train and test the accuracy of a linear model.
+```{r}
+# Create training indices
+clean_data <- clean_data |> drop_na()
+
+train_idx <- sample(1:nrow(clean_data), size = 0.8 * nrow(clean_data))
+
+train_data <- clean_data[train_idx, ]
+test_data  <- clean_data[-train_idx, ]
+
+```
+
+```{r}
+rk_lm_model <- lm(Rk ~ PTS + AST + TRB + STL + BLK + eFG. + MP + TOV,
+               data = train_data)
+
+summary(rk_lm_model)
 
 
+train_pred_lm <- predict(rk_lm_model, newdata = train_data)
+test_pred_lm  <- predict(rk_lm_model, newdata = test_data)
+
+# Compute RMSE
+rmse_train <- sqrt(mean((train_data$Rk - train_pred_lm)^2))
+rmse_test  <- sqrt(mean((test_data$Rk - test_pred_lm)^2))
+
+rmse_train
+rmse_test
+```
+
+As shown our RMSE for our training set is 38.3585 and for our testing set is 41.57316. As these values are very close together, this tells us that our model is not over fitting and is able to generalize to new unseen data.
+
+The RMSE values being around ~40 indicates to us that on overage the model is able to predict the numerical ranking of players of within 40 places from their actual rank. While this may seem like a lot, this is to be expected as the numerical ranking of players is non-linear and many players have very similar stats. As such small differences in ranking may come from subjective or external factors that can not be explained purely through raw data. The results suggest that the model captures broad patterns in how player statistics relate to ranking, but we are limited by the complexity of external factors and their influences on ranking as well as the limitations in linear regression. While our model is not precise in rank prediction, it is useful in the understanding of general trends.
 
 
+We now will look to create a multinomial Log-linear model to see if we can accurately determine if a player is an Elite/Above Average/Role(Average) or Low(below average) player. 
 
+```{r}
+clean_data$RankTier <- cut(
+  clean_data$Rk,
+  breaks = c(0, 50, 150, 300, 444),
+  labels = c("Low", "Role", "Above Average", "Elite")
+)
+clean_data$RankTier <- relevel(clean_data$RankTier, ref = "Low")
+
+```
+
+```{r}
+n <- nrow(clean_data)
+
+# Creating train/test data
+train_idx <- sample(1:n, size = 0.8 * n)
+train_data <- clean_data[train_idx, ]
+test_data  <- clean_data[-train_idx, ]
+
+
+# Fitting model
+multi_mod <- multinom(
+  RankTier ~ PTS + MP + AST + TRB + STL + BLK + eFG. + TOV + Age,
+  data = train_data
+)
+
+summary(multi_mod)
+
+
+# Predict on training and testing sets
+
+train_pred <- predict(multi_mod, newdata = train_data)
+test_pred  <- predict(multi_mod, newdata = test_data)
+
+
+# Calculate accuracy
+
+train_accuracy <- mean(as.character(train_pred) == as.character(train_data$RankTier))
+test_accuracy  <- mean(as.character(test_pred)  == as.character(test_data$RankTier))
+
+
+train_accuracy
+test_accuracy
+
+
+# Confusion matrix for the test set
+
+table(Predicted = test_pred, Actual = test_data$RankTier)
+```
+
+We evaluated the multinomial logistic regression model using a held out 20% test set. The confusion matrix shows that the model correctly classified 71 out of 73 players, corresponding to a test accuracy of approximately 97%. Misclassifications were minor: one Elite player was predicted as Above Average, and one Role player was predicted as Low Impact. All other players were assigned to the correct tier. These errors occurred between adjacent tiers, which suggests that the model’s mistakes are reasonable and largely reflect small differences in performance rather than complete misidentification. Overall, the high and similar training and testing accuracy indicate that the model generalizes well and captures strong relationships between player statistics and ranking tiers.
+
+```{r}
+# Extract coefficient table
+coef_table <- summary(multi_mod)
+
+# Compute standard errors
+std_err <- coef_table$standard.errors
+
+# Compute z-values for each coefficient
+z_vals <- coef_table$coefficients / std_err
+
+# Combine into a readable table
+importance_table <- data.frame(
+  Predictor = rep(colnames(coef_table$coefficients), each = nrow(coef_table$coefficients)),
+  Class = rep(rownames(coef_table$coefficients), times = ncol(coef_table$coefficients)),
+  Coefficient = as.vector(coef_table$coefficients),
+  StdError = as.vector(std_err),
+  Zvalue = as.vector(z_vals)
+)
+
+# Filter to Elite vs baseline only (Elite row)
+elite_importance <- importance_table |> 
+  filter(Class == "Elite") |> 
+  arrange(desc(abs(Zvalue)))
+
+elite_importance
+
+```
+
+The Elite vs Low comparison in the multinomial logistic regression produced extremely large coefficients and z-values, indicating quasi-complete separation between Elite and Low players. This occurs because Elite players occupy a part of the statistical space that Low-tier players almost never overlap—for example, Elite players simultaneously exhibit high scoring, high minutes played, and high efficiency, none of which are observed among Low-tier players. As a result, the logistic model attempts to draw a nearly perfect boundary, causing some coefficients to diverge toward very large magnitudes.
+Although the absolute coefficient values are not interpretable under separation, the relative magnitudes of the z-values still reveal meaningful variable importance. Shooting efficiency (eFG%) was the strongest separator of Elite players, followed by points per game, steals, turnovers (reflecting high-usage roles), minutes played, and assists. Age and rebounds contributed only weakly. These results show that elite players are most distinguished by their combination of scoring volume, efficiency, offensive involvement, and defensive playmaking.
+
+
+Conclusion:
+This analysis demonstrates how NBA player statistics can be used to predict both individual scoring output and broader performance tiers, revealing clear patterns in how certain variables influence overall player impact. Across all models, a consistent set of variables—particularly points, minutes played, efficiency (eFG%), assists, and turnovers emerged as statistically significant contributors to performance outcomes. Linear regression showed that shot volume is the strongest driver of scoring, but also highlighted how efficiency and offensive involvement meaningfully explain scoring variation even after accounting for shooting attempts. Attempts to predict exact ranking values confirmed that ranking is difficult to model as a continuous measure, yet the statistical significance of core variables still revealed recognizable trends in how player performance relates to perceived value.
+Transitioning to categorical models allowed for more stable and interpretable results. By grouping players into ranking tiers and applying multinomial regression, we found that these same variables—especially efficiency, scoring volume, minutes, and playmaking carry substantial predictive weight in determining whether a player falls into an elite or lower-tier category. These models also showed that defensive statistics and age play smaller, but still measurable, roles depending on context. Overall, the analysis highlights the value of combining multiple modeling approaches to understand the complex relationships among player statistics. It also underscores the broader takeaway that a small set of performance variables consistently drive both quantitative scoring outcomes and qualitative evaluations of player impact.
 
 
