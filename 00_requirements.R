@@ -83,6 +83,11 @@ if (!require(olsrr)) {
   library(olsrr)
 }
 
+# Ordinal logistic regression (polr)
+if (!require(MASS)) {
+  install.packages("MASS")
+  library(MASS)
+}
 
 # ---------------------------
 # Reporting / R Markdown

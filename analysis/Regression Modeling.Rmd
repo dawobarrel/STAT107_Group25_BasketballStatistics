@@ -1,0 +1,106 @@
+---
+title: "Regression Modeling"
+output: pdf_document
+date: "2025-12-05"
+---
+
+We will continue our analysis of the 2024 NBA player statistics by looking to implement both Linear and logistic Regression models to predict player's points per game (PTS) as well as the overall ranking of the players respectively based on other statistics. We will use our insights from our correlation analysis in helping choose appropriate parameters within these models.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+
+# Load cleaned dataset
+load(here::here("data", "nba2024_cleaned.RData"))
+
+# Load required libraries
+source(here::here("00_requirements.R"))
+```
+
+Before fitting a linear regression model to predict PTS, it’s useful to look at how the response variable is distributed. This helps confirm that the values make sense, there are no extreme outliers, and that PTS behaves in a way that works well for linear modeling.
+
+
+
+
+```{r}
+hist(
+  clean_data$PTS,
+  breaks = 30,
+  main = "Histogram of Points (PTS)",
+  xlab = "Points",
+  col = "lightgray",
+  border = "white"
+)
+
+plot(
+  density(clean_data$PTS, na.rm = TRUE),
+  main = "Density Plot of Points (PTS)",
+  xlab = "Points"
+)
+
+boxplot(
+  clean_data$PTS,
+  main = "Boxplot of Points (PTS)",
+  ylab = "Points"
+)
+```
+The histogram shows a right-skewed distribution, which is completely expected for NBA scoring data.
+Most players score modest amounts, while a smaller group scores very high  this is natural and not a problem for linear regression.
+There is no severe skew, no long tail, and no shape that suggests the need for a transformation.
+
+The density curve reinforces this pattern.
+It is unimodal, smooth, and shows only mild right-skewness.
+Nothing in the distribution suggests instability or irregularity.
+
+The boxplot shows a handful of high-scoring players that appear as “upper outliers,” but these represent real star players, not data errors.
+This is normal for sports stats and does not violate linear regression assumptions.
+
+The distribution of PTS shows mild right-skewness and a small number of high-scoring players, which is expected in NBA data. These patterns do not violate linear regression assumptions, and the data appears appropriate for modeling without transformation. As such we can continue with implementation of our model.
+
+We will begin with choosing variables we want to include in the model.
+
+```{r}
+model_vars <- c("PTS", "AST", "TRB", "eFG.", "TOV", "Age", "MP")
+stats_model <- clean_data[, model_vars, drop = FALSE]
+```
+
+Remove rows with missing values only for modelling
+
+```{r}
+stats_model <- stats_model |> drop_na()
+```
+
+
+Exploratory Check of Predictors:
+
+```{r}
+pairs(stats_model, main = "Pairs Plot of Modeling Variables")
+```
+Before fitting the regression model, we take a quick look at the relationships between PTS and potential predictors. This helps confirm that the variables chosen are relevant and not too strongly correlated with each other. For example we would not want to include "FGA" as one of our variables as shown in our correlation analysis pts~fga had a correlation value of 0.99 making them too strongly correlated for the sake of our analysis as we would like to explore the predictive power of other variables rather then just creating the most accurate model.
+
+As we already know if we include FGA in our model it will make other variables insignificant we will look to create two seperate models. One without FGA to look explore the contribution of other statistics in predicting number of points. And another with FGA to create the most accurate model.
+
+We will begin with the model excluding FGA.
+This model predicts points per game using a combination of shooting volume (FGA), playmaking (AST), rebounding (TRB), shooting efficiency (eFG.), turnovers (TOV), and age. These variables were chosen to avoid multicollinearity and to reflect different aspects of player performance.
+```{r}
+linear_model_1 <- lm(PTS ~ AST + TRB + eFG. + TOV + Age, data = stats_model)
+summary(linear_model_1)
+
+```
+The linear regression model without FGA explains a substantial portion of scoring variation (Adjusted R² = 0.76). Assists, rebounds, shooting efficiency, and turnovers are all significant positive predictors of points per game, reflecting that players with higher offensive involvement and efficiency tend to score more. Age was not statistically significant, which matches our earlier correlation findings showing that age is only weakly related to performance variables.
+
+```{r}
+
+#The diagnostic plots help us check whether the assumptions of linear regression are met, including linearity, constant variance, and normally distributed residuals.
+par(mfrow=c(2,2))
+plot(linear_model_1)
+par(mfrow=c(1,1))
+```
+
+The diagnostic plots indicate that the assumptions of linear regression are reasonably satisfied. The residuals show no major nonlinear patterns, residual variance appears relatively constant, and residuals are approximately normally distributed. A few influential observations appear in the leverage plot, which is expected due to the presence of high-usage superstar players, but they do not distort the model. Overall, the model is statistically sound and provides meaningful insights into the predictors of scoring when shot volume is intentionally excluded.
+
+
+
+
+
