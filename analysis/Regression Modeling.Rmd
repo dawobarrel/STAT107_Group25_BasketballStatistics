@@ -98,7 +98,18 @@ plot(linear_model_1)
 par(mfrow=c(1,1))
 ```
 
+The residuals vs fitted plot shows no major patterns, suggesting that the linearity assumption is reasonably met.
+The Q–Q plot indicates that residuals are approximately normally distributed, with only mild deviations at the extremes.
+The scale–location plot shows relatively constant variance, suggesting that the homoscedasticity assumption is not violated.
+The residuals vs leverage plot identifies a few influential cases, which is expected for NBA data, but none appear to unduly distort the model.
+
+
 The diagnostic plots indicate that the assumptions of linear regression are reasonably satisfied. The residuals show no major nonlinear patterns, residual variance appears relatively constant, and residuals are approximately normally distributed. A few influential observations appear in the leverage plot, which is expected due to the presence of high-usage superstar players, but they do not distort the model. Overall, the model is statistically sound and provides meaningful insights into the predictors of scoring when shot volume is intentionally excluded.
+
+
+Within our data set we include data on the overall rankings of players throughout the 2024-2025 Season. Using ordered logistic regression we will look to see if we can accurately predict the ranking of players through their stats.
+
+
 
 
 
