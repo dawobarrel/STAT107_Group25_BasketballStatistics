@@ -10,7 +10,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(here)
 
 # Load cleaned dataset
@@ -18,6 +18,7 @@ load(here::here("data", "nba2024_cleaned.RData"))
 
 # Load required libraries
 source(here::here("00_requirements.R"))
+nba <- clean_data
 ```
 
 
@@ -49,11 +50,7 @@ Understanding these relationships supports more informed evaluation, prediction,
 
   Currently we can see that team statistics do somewhat contribute to a player's success, although there is no direct correlation or causation for the claim. Durability and minutes players have a small impact, as players do need to play a lot of minutes to be highly productive players, but there isn’t a complete linear positive correlation for that claim. We also see that position doesn’t affect a player's value, as all positions have relatively the same average points per game.
   
-#Analysis
-```{r}
-nba <- nba2024
-```
-
+# Analysis
 
 ```{r}
 hist(nba$PTS,
@@ -63,9 +60,397 @@ hist(nba$PTS,
      border = "white")
 ```
 
-This histogram illustrates a right-skewed (positively skewed) distribution of Points Per Game (PPG). The shape indicates that the vast majority of NBA players fall into the lower scoring ranges, while only a small number of players achieve very high scoring averages, creating a long tail to the right. The median, or the most frequent range, is heavily concentrated between approximately 10 and 15 PPG, mostly representing the rotational players in the NBA.
+
+This histogram illustrates a right-skewed (positively skewed) distribution of Points Per Game (PPG). The shape indicates that the vast majority of NBA players fall into the lower scoring ranges, while only a small number of players achieve very high scoring averages, creating a long tail to the right. The median, or the most frequent range, is heavily concentrated between approximately 10 to 15 PPG, mostly representing the rotational players in the NBA.
 
 The distribution shows significant concentration in the lower-to-moderate scoring tiers, with the bulk of the data falling below 20 PPG. This high concentration highlights the fundamental structure of an NBA roster, where many players fulfill specialized, lower-scoring roles. However, the presence of bars extending toward 30 PPG represents the elite scorers and superstars, whose exceptionally high averages demonstrate the significant variability in scoring output across the league.
 
+```{r}
+boxplot(PTS ~ Pos,
+        data = nba,
+        main = "Points Per Game by Position",
+        xlab = "Position",
+        ylab = "PPG",
+        col = "lightgreen")
+```
 
+
+This box plot compares Points Per Game (PPG) across the different positions, revealing key differences in scoring roles.
+
+The chart shows that Point Guards (PG) and Small Forwards (SF) have the highest median scoring output and the greatest variability (widest boxes and longest whiskers). These positions also produce the highest-scoring outliers, including a PG scoring more than 30 PPG, confirming their status as primary offensive creators and finishers.
+
+On the other hand, positions like Power Forward (PF) and Center (C) show lower median scores and much tighter, more consistent distributions (smaller IQR). This suggests that players in these roles generally have more fixed, lower-volume scoring duties, emphasizing consistency and defense over flashy play-making, which is reserved for the guards and Small Forwards.
+
+
+```{r}
+plot(nba$MP, nba$PTS,
+     main = "Minutes Played vs Points Per Game",
+     xlab = "Minutes Played (MP)",
+     ylab = "Points (PPG)",
+     pch = 19,
+     col = "darkorange")
+```
+
+
+The scatter plot shows the relationship between Minutes Played (MP) and Points Per Game (PPG). The relationship is strong, positive and curvilinear, showing that as MP increases, PPG also increases, showing the more minutes played per game, the more points per game they are likely to score.
+
+The correlation is not perfectly linear. The data follows a curve that is steeper at low minutes. The relationship seems to spread out past 30 minutes played. This suggests there might be diminishing returns for scoring. Playing 35 minutes does not completely guarantee a player scores more points per game than a player playing around 30 minutes.
+
+Through this graph, we can see there is clearly high variability across all minute levels. Players playing 20 minutes per game can vary between 5 PPG and 20 PPG. This wide spread shows that MP is only a partial predictor of scoring. Other metrics, such as shooting efficiency and usage rate, are needed to explain why players who have similar MP have varying PPGs.
+
+```{r}
+plot(density(nba$PTS, na.rm = TRUE),
+     main = "Density of Points Per Game",
+     xlab = "PPG")
+```
+
+
+This curve is a density plot showing the continuous distribution of Points Per Game (PPG), which is strongly right-skewed. The majority of the data is concentrated in a single peak, or mode, occurring between 3 and 7 PPG. This shows that the typical NBA player is a moderate scorer, with most players having very similar scoring outputs.
+
+The plot quickly confirms the rarity of elite scorers as the curve drops sharply past 20 PPG. However, the tail extends significantly towards 20 and 30 PPG, visualizing the handful of superstars whose extreme averages exist outside the main player population. This disparity means the mean (average) is inflated and is pulled higher than the median (midpoint).
+
+In summary, the density plot provides the clearest visual evidence of the tiered scoring structure in the NBA. It proves the distribution is non-normal, which is crucial for statistical modeling.
+
+# Correlation Analysis
+
+We will begin our analysis of the 2024 NBA player statistics by exploring the correlation among the variables we have within this data set.
+Correlation analysis helps us see which statistics tend to move together and which ones behave independently. This gives us a clearer picture of how different parts of a player’s game relate to one another and helps identify which variables might be redundant or telling the same story.
+
+
+
+
+```{r, echo = FALSE, include = FALSE}
+dim(clean_data)
+names(clean_data)
+str(clean_data)
+```
+
+```{r, echo = FALSE, include = FALSE}
+# Variables we want to examine (edit names as needed)
+vars <- c(
+  # Performance
+  "PTS", "TRB", "AST", "STL", "BLK", "TOV", "PF", 
+  
+  # Volume
+  "MP", "FGA", "FTA",
+  
+  # Efficiency 
+  "FG_pct", "X3P_pct", "X2P_pct", "FT_pct", "eFG.",
+  
+  # Age(While not a performance statistics, would still like to explore if there is any correlation between increasing age with these other variables)
+  "Age"
+)
+```
+
+```{r, echo = FALSE, include = FALSE}
+stats <- clean_data[ , vars, drop = FALSE]
+
+is_num <- sapply(stats, is.numeric)
+stats_num <- stats[ , is_num, drop = FALSE]
+str(stats_num)
+```
+
+```{r, echo = FALSE, include = FALSE}
+cor_mat <- cor(stats_num, use = "pairwise.complete.obs")
+round(cor_mat, 2)
+```
+
+
+
+
+```{r corrplot-visual, fig.width=10, fig.height=10, echo = FALSE}
+corrplot(
+  cor_mat,
+  method = "circle",      # color tiles
+  type   = "upper",      # show upper triangle only
+  order  = "hclust",     # cluster similar variables
+  addCoef.col = "black", # add correlation coefficients
+  tl.cex = 0.8           # label size-±
+)
+```
+
+
+
+
+The correlation heatmap gives a quick visual summary of how the main performance stats relate to each other. Larger, darker circles show stronger relationships.
+
+A few patterns stand out:
+
+- Scoring and shooting volume go together.
+- Points (PTS) are very closely tied to field-goal attempts (FGA) and free-throw attempts (FTA). This makes sense as players who take more shots usually score more.
+- Rebounding and blocking are connected.
+- Total rebounds (TRB) and blocks (BLK) show a strong positive relationship, showing that interior players tend to contribute in both areas.
+- Assists (AST) and turnovers (TOV) rise together. Players who handle the ball more create more plays but also commit more turnovers.
+- Efficiency stats cluster together.
+- FG%, eFG%, and 2-point percentage are all closely related, which is expected since they measure similar aspects of shooting ability.
+- Age has almost no strong correlations with the other variables. This supports the idea that older players can still perform at a high level such as Lebron James as seen in the league today.
+
+Overall, the heatmap helps us see how NBA stats naturally group together: usage stats (PTS, FGA, AST, TOV) form one cluster, interior stats (TRB, BLK) form another, and shooting efficiency stands on its own.
+
+The final correlation heat map confirms the overall structure of player performance. Minutes Played (MP) correlates strongly with Points Per Game (PPG) (0.88), reinforcing that high production requires high playing time. Field Goals Attempted (FGA) shows an almost perfect correlation with PTS (0.99). This proves scoring volume is driven almost entirely by shooting volume. Furthermore, the high correlation between Assists (AST), Turnovers (TOV) (0.86), and PTS shows that high-usage players accumulate all three stats simultaneously.
+
+This matrix provides crucial data to make comparisons with. Effective Field Goal Percentage (eFG) shows only a weak correlation with high-volume metrics like PTS (0.16) and FGA (0.06). The high correlation of Free Throws Attempted (FTA) with PTS (0.90) confirms that drawing fouls is a key scoring skill, demanding a strong impact on the value model.
+
+Two key actions must be implemented based on these findings. First, treat MP as a necessary filter, not a predictive variable, due to its strong but non-causal link to PTS. Second, teams and players must heavily penalize Turnovers (TOV). Its link to high-usage stats (PTS, AST) means failing to penalize TOV will incorrectly reward players who simply handle the ball more. This final analysis provides the necessary relationships to select and weight variables accurately.
+
+
+
+
+
+
+```{r pair-plots, fig.width=10, fig.height=10, echo = FALSE, include = FALSE}
+
+
+
+pair_vars <- c(
+  "PTS",     # Scoring
+  "AST",     # Playmaking
+  "TRB",     # Rebounding
+  "STL",     # On-ball defense
+  "BLK",     # Rim defense
+  "FG_pct",  # Shooting efficiency
+  "eFG.",    # Adjusted efficiency
+  "TOV"      # Turn overs
+)
+
+pair_vars <- intersect(pair_vars, colnames(stats_num))  # safety check
+
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+    ggpairs(
+      stats_num[ , pair_vars, drop = FALSE],
+      progress = FALSE
+    )
+```
+
+
+
+
+This visualization displays the relationships between nine key player statistics: PTS (Points Per Game), AST (Assists), TRB (Total Rebounds), STL (Steals) , BLK (Blocks), FG_pct (Field Goal Percent), eFG (Effective Field Goal Percentage), and TOV (Turnovers). 
+
+The chart uses a pairwise scatter plot matrix: the diagonal shows the density plot for each variable; the lower half displays the scatter plots; and the upper half provides the correlation coefficient ($R$) and significance for each pair. This structure allows for simultaneous evaluation of statistical relationships and visual patterns.
+
+The matrix reveals several strong associations essential for player modeling. The strongest correlation exists between PTS and TOV (0.852), confirming that high-usage scorers who handle the ball more commit more turnovers. Similarly, PTS and AST (0.752) show a strong link; high scorers are often primary playmakers. Importantly, shooting efficiency metrics (FG_pct and eFG) show only weak correlation with volume stats like PTS (e.g., PTS vs. eFG is 0.161). This separation suggests that a player's raw scoring volume does not guarantee efficient shooting. For this project, these correlations offer actionable insights.
+
+# Regression Modeling
+
+We will continue our analysis of the 2024 NBA player statistics by looking to implement both Linear and logistic Regression models to predict player's points per game (PTS) as well as the overall ranking of the players respectively based on other statistics. We will use our insights from our correlation analysis in helping choose appropriate parameters within these models.
+
+
+
+
+```{r, include = FALSE}
+hist(
+  clean_data$PTS,
+  breaks = 30,
+  main = "Histogram of Points (PTS)",
+  xlab = "Points",
+  col = "lightgray",
+  border = "white"
+)
+
+plot(
+  density(clean_data$PTS, na.rm = TRUE),
+  main = "Density Plot of Points (PTS)",
+  xlab = "Points"
+)
+
+boxplot(
+  clean_data$PTS,
+  main = "Boxplot of Points (PTS)",
+  ylab = "Points"
+)
+```
+
+```{r, include = FALSE}
+model_vars <- c("PTS", "AST", "TRB", "eFG.", "TOV", "Age", "MP")
+stats_model <- clean_data[, model_vars, drop = FALSE]
+```
+
+```{r, include = FALSE}
+stats_model <- stats_model |> drop_na()
+```
+
+```{r}
+pairs(stats_model, main = "Pairs Plot of Modeling Variables")
+```
+
+
+
+
+The pairs plot displays relationships among key modeling variables: PTS, AST, TRB, eFG, TOV, Age, and MP. The visual evidence confirms several strong relationships. Minutes Played (MP) shows a clear, positive trend with both Points Per Game (PTS) and Assists (AST). More playing time strongly correlates with higher volume statistics. Also, Assists (AST) and Turnovers (TOV) show a tight, positive linear correlation. High usage naturally drives both playmaking and mistakes.
+
+The plot highlights a critical modeling challenge: the relationship between volume and efficiency. The scatter plot for PTS versus eFG shows a very weak, almost flat association. This confirms that effective field goal percentage (eFG) is largely independent of a player's scoring volume. Furthermore, the accompanying text notes that PTS and FGA have a correlation value of 0.99. This extreme correlation proves that Field Goals Attempted (FGA) is redundant in the model and should be excluded for better predictive power.
+
+These visualizations offer actionable insights for model construction. TRB (Total Rebounding) must be treated as a separate, valuable predictor, as its scatter plots show it has only moderate links to the main volume stats. eGF (Effective Field Goal Percentage) must be included to isolate efficiency, a key factor not captured by scoring totals. Finally, a model that accounts for the strong multi-collinearity among volume stats (PTS, AST, TOV, FGA), likely by excluding variables like FGA to create the most accurate model, is crucial.
+
+```{r}
+linear_model_1 <- lm(PTS ~ AST + TRB + eFG. + TOV + Age, data = stats_model)
+summary(linear_model_1)
+
+```
+
+
+
+This regression output shows that Assists, Total Rebounds, Effective Field Goal Percentage, and Turnovers are all statistically significant predictors of Points Per Game, with the model explaining about 76% of the variance in scoring.
+
+```{r}
+
+#The diagnostic plots help us check whether the assumptions of linear regression are met, including linearity, constant variance, and normally distributed residuals.
+par(mfrow=c(2,2))
+plot(linear_model_1)
+par(mfrow=c(1,1))
+```
+
+
+
+
+The regression output strongly predicts Points Per Game (PTS) using a combination of playmaking, rebounding, efficiency, and turnovers, achieving an Adjusted R-squared of 0.7616. This means the model explains over 76% of the variance in scoring, which is highly significant ($p\text{-value} < 2.2\text{e-}16$). All included predictors—Assists (AST), Total Rebounds (TRB), Effective Field Goal Percentage (eFG), and Turnovers (TOV)—are statistically significant at the 0.05 level or better.
+
+Within our data set we include data on the overall rankings of players throughout the 2024-2025 Season. We will first look to see if we can accurately predict the numerical ranking of players using a linear regression model.
+
+We begin by creating a 80/20 Split to train and test the accuracy of a linear model.
+
+```{r, include = FALSE}
+# Create training indices
+clean_data <- clean_data |> drop_na()
+
+train_idx <- sample(1:nrow(clean_data), size = 0.8 * nrow(clean_data))
+
+train_data <- clean_data[train_idx, ]
+test_data  <- clean_data[-train_idx, ]
+
+```
+
+
+```{r}
+rk_lm_model <- lm(Rk ~ PTS + AST + TRB + STL + BLK + eFG. + MP + TOV,
+               data = train_data)
+
+summary(rk_lm_model)
+
+
+train_pred_lm <- predict(rk_lm_model, newdata = train_data)
+test_pred_lm  <- predict(rk_lm_model, newdata = test_data)
+
+# Compute RMSE
+rmse_train <- sqrt(mean((train_data$Rk - train_pred_lm)^2))
+rmse_test  <- sqrt(mean((test_data$Rk - test_pred_lm)^2))
+
+rmse_train
+rmse_test
+```
+
+
+
+
+
+As shown our RMSE for our training set is 38.3585 and for our testing set is 40.26133. As these values are very close together, this tells us that our model is not over fitting and is able to generalize to new unseen data.
+
+The RMSE values being around ~40 indicates to us that on overage the model is able to predict the numerical ranking of players of within 40 places from their actual rank. While this may seem like a lot, this is to be expected as the numerical ranking of players is non-linear and many players have very similar stats. As such small differences in ranking may come from subjective or external factors that can not be explained purely through raw data. The results suggest that the model captures broad patterns in how player statistics relate to ranking, but we are limited by the complexity of external factors and their influences on ranking as well as the limitations in linear regression. While our model is not precise in rank prediction, it is useful in the understanding of general trends.
+
+
+We now will look to create a multinomial Log-linear model to see if we can accurately determine if a player is an Elite/Above Average/Role(Average) or Low(below average) player:
+
+```{r, include = FALSE}
+clean_data$RankTier <- cut(
+  clean_data$Rk,
+  breaks = c(0, 50, 150, 300, 444),
+  labels = c("Low", "Role", "Above Average", "Elite")
+)
+clean_data$RankTier <- relevel(clean_data$RankTier, ref = "Low")
+
+```
+
+```{r, echo = FALSE}
+n <- nrow(clean_data)
+
+# Creating train/test data
+train_idx <- sample(1:n, size = 0.8 * n)
+train_data <- clean_data[train_idx, ]
+test_data  <- clean_data[-train_idx, ]
+
+
+# Fitting model
+multi_mod <- multinom(
+  RankTier ~ PTS + MP + AST + TRB + STL + BLK + eFG. + TOV + Age,
+  data = train_data
+)
+
+summary(multi_mod)
+
+
+# Predict on training and testing sets
+
+train_pred <- predict(multi_mod, newdata = train_data)
+test_pred  <- predict(multi_mod, newdata = test_data)
+
+
+# Calculate accuracy
+
+train_accuracy <- mean(as.character(train_pred) == as.character(train_data$RankTier))
+test_accuracy  <- mean(as.character(test_pred)  == as.character(test_data$RankTier))
+
+
+train_accuracy
+test_accuracy
+
+
+# Confusion matrix for the test set
+
+table(Predicted = test_pred, Actual = test_data$RankTier)
+```
+
+
+
+
+
+
+We evaluated the multinomial logistic regression model using a held out 20% test set. The confusion matrix shows that the model correctly classified 71 out of 73 players, corresponding to a test accuracy of approximately 97%. Misclassifications were minor: one Elite player was predicted as Above Average, and one Role player was predicted as Low Impact. All other players were assigned to the correct tier. These errors occurred between adjacent tiers, which suggests that the model’s mistakes are reasonable and largely reflect small differences in performance rather than complete misidentification. 
+
+Overall, the high and similar training and testing accuracy indicate that the model generalizes well and captures strong relationships between player statistics and ranking tiers.
+
+
+```{r, echo = FALSE}
+# Extract coefficient table
+coef_table <- summary(multi_mod)
+
+# Compute standard errors
+std_err <- coef_table$standard.errors
+
+# Compute z-values for each coefficient
+z_vals <- coef_table$coefficients / std_err
+
+# Combine into a readable table
+importance_table <- data.frame(
+  Predictor = rep(colnames(coef_table$coefficients), each = nrow(coef_table$coefficients)),
+  Class = rep(rownames(coef_table$coefficients), times = ncol(coef_table$coefficients)),
+  Coefficient = as.vector(coef_table$coefficients),
+  StdError = as.vector(std_err),
+  Zvalue = as.vector(z_vals)
+)
+
+# Filter to Elite vs baseline only (Elite row)
+elite_importance <- importance_table |> 
+  filter(Class == "Elite") |> 
+  arrange(desc(abs(Zvalue)))
+
+elite_importance
+
+```
+
+
+
+The regression comparing Elite and Low players showed large coefficients, this indicates quasi-complete separation. This happened because Elite players combine high scoring, high minutes, and high efficiency, a statistical space Low-tier players never reach. The z-values confirmed that shooting efficiency (eFG%) is the strongest separator, followed by scoring volume and offensive involvement.
+
+
+# Conclusion
+
+Based on the analysis conducted, it appears that there is a heavy positive correlation between Minutes Played (MP) and Points Per Game (PPG) across the entire NBA player population. This trend, visible in the scatter plot, supports the notion that increased playing time is necessary for high productivity. However, the wide vertical spread of data points at all MP levels demonstrates that MP alone is not a sufficient linear predictor of scoring success, suggesting a low coefficient of determination for a simple linear model.
+
+Furthermore, the analysis of the PPG distribution indicates that the relationship between scoring and value is non-linear and highly tiered. The distribution is severely right-skewed, confirming that the few elite player outliers operate outside the normal performance curve of the league. While average PPG shows high parity, the PTS by Position box plot revealed that Point Guard (PG) and Small Forward (SF) roles exhibit the greatest scoring variance and highest outliers, providing strong evidence that these are the positional channels for maximum offensive value.
+
+In conclusion, the current regression model proves that high player value is defined by a few key factors including minutes played, efficiency, and high-potential position, rather than simple averages. The relationship is robust but not perfect, particularly with the misleading positive coefficient for Turnovers. The combined analysis of the linear regression and multinomial models definitively proves that player value is determined by efficiency (eFG%) and specific positional roles (PG/C) rather than raw scoring volume, or team averages.
 
