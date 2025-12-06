@@ -39,46 +39,10 @@ Had no need to create functions.
 Anaylsis Files(Rmd)
 11_DataCleaning - Renamed variables for better readability. Filtered players that had played for multiple teams throughout season into one single profile. Filtered out players with less than 20 games played to remove instability from per game averages. Loaded cleaned data into repository for loading in future analysis.
 
-Correlation Analysis - The correlation analysis provides an initial exploratory view of how player statistics relate to one another. Using heatmaps, pair plots, and summary statistics, we identify clusters of highly related variables and isolate the most influential performance metrics.
-Key findings include:
-Field Goal Attempts (FGA) shows a near-perfect correlation with Points per Game (PTS), confirming that shot volume is the primary driver of scoring.
-Minutes Played (MP), Assists (AST), and Rebounds (TRB) form strong positive clusters with other performance metrics, reflecting broader offensive involvement.
-Efficiency metrics such as Effective Field Goal Percentage (eFG%) are moderately correlated with scoring and help differentiate high-impact players.
-Age displays weak correlations with most performance variables, suggesting that player impact is driven more by role and usage than by age alone.
-The correlation analysis guided variable selection for later modeling and highlighted which predictors may introduce multicollinearity issues.
+Correlation Analysis - Provides an exploratory analysis of NBA player statistics using correlation heatmaps, pair plots, and summary visualizations. Identifies relationships among variables and highlights which metrics are most strongly associated, helping guide variable selection for later modeling.
 
-2. Linear Regression Analysis
-a. Predicting Points (PTS)
-Linear regression models were built to identify which statistics best predict scoring output.
-Including FGA results in a highly accurate but unsurprising model, given its extreme correlation with PTS.
-Excluding FGA shifts importance to eFG%, AST, TRB, and TOV, showing that scoring is also explained by efficiency, offensive role, and overall involvement.
-Diagnostic checks confirmed that model assumptions were reasonably met and that the models generalized well.
-This analysis demonstrates how different aspects of performance contribute to point production beyond sheer shot volume.
-b. Predicting Numeric Ranking
-A linear regression model was used to predict player ranking (Rk) as a continuous variable.
-The model achieved moderate accuracy (RMSE ~38–42), indicating that performance statistics do capture some ranking structure.
-Training and testing errors were similar, suggesting the model identifies general patterns rather than overfitting.
-However, predicting precise rank values is limited by the nonlinear and subjective nature of ranking systems.
-This analysis highlights the challenges of treating rank as a continuous variable but still reveals useful insights into performance factors tied to ranking.
-3. Multinomial Logistic Regression for Ranking Tiers
-To improve interpretability and stability, player rankings were grouped into four tiers:
-Elite (Top 50)
-Above Average
-Role Player
-Low Impact
-A multinomial logistic regression model was used to predict tier membership based on performance metrics such as PTS, MP, AST, TRB, STL, BLK, eFG%, TOV, and Age.
-Key results:
-The model achieved very high accuracy on both training and testing sets, correctly classifying the majority of players across all tiers.
-Efficiency (eFG%), scoring volume (PTS), minutes played (MP), steals (STL), and assists (AST) emerged as the most influential predictors separating elite players from lower-tier ones.
-Age and some defensive statistics played smaller roles, consistent with earlier correlation findings.
-Some comparisons exhibited quasi-complete separation, indicating strong statistical differences between tiers—especially Elite vs. Low-tier players.
-This tier-based approach proved far more robust and interpretable than predicting exact ranking values.
-🏁 Overall Takeaways
-Shot volume, efficiency, and offensive involvement consistently appear as the strongest predictors of scoring and player impact.
-eFG%, PTS, and MP are key variables that distinguish higher-tier players, demonstrating both statistical and practical significance.
-Predicting exact ranking is challenging, but predicting ranking tiers using multinomial logistic regression produces accurate and meaningful results.
-Combining correlation analysis with linear and multinomial models provides a comprehensive understanding of player performance dynamic
+ Regression Analysis - Builds predictive models to analyze scoring and ranking outcomes. Includes linear regression for predicting points and ranking, and multinomial logistic regression for classifying players into performance tiers. Evaluates model performance and identifies key variables that significantly influence player impact.
 
-Report File
-.....
+Final Report - Provides the rmd file for our final report including the necessary graphs and visualizatons in helping conclude our findings.
+
 
