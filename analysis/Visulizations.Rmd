@@ -17,6 +17,10 @@ load(here::here("data", "nba2024_cleaned.RData"))
 source(here::here("00_requirements.R"))
 ```
 
+```{r}
+nba <- clean_data
+```
+
 
 ```{r}
 hist(nba$PTS,
