@@ -75,7 +75,7 @@ corrplot(
   type   = "upper",      # show upper triangle only
   order  = "hclust",     # cluster similar variables
   addCoef.col = "black", # add correlation coefficients
-  tl.cex = 0.8           # label size
+  tl.cex = 0.8           # label size-±
 )
 ```
 
