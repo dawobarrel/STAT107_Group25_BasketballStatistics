@@ -454,3 +454,12 @@ Furthermore, the analysis of the PPG distribution indicates that the relationshi
 
 In conclusion, the current regression model proves that high player value is defined by a few key factors including minutes played, efficiency, and high-potential position, rather than simple averages. The relationship is robust but not perfect, particularly with the misleading positive coefficient for Turnovers. The combined analysis of the linear regression and multinomial models definitively proves that player value is determined by efficiency (eFG%) and specific positional roles (PG/C) rather than raw scoring volume, or team averages.
 
+
+# Team Contribution Section
+
+Alejandro: Worked on most of the GitHub repository, and code used for the project.
+
+Darrell: Worked on some of the Github repository, worked on editing report.
+
+Kelvin: Worked on analysis for report, correlation, regression, etc, as well as report setup/structure and abstract.
+
