@@ -1,21 +1,27 @@
 ---
 title: "visualizations"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 date: "2025-11-14"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(here)
+
+# Load cleaned dataset
+load(here::here("data", "nba2024_cleaned.RData"))
+
+# Load required libraries
+source(here::here("00_requirements.R"))
 ```
 
-```{r}
-nba <- nba2024
-```
 
 ```{r}
 hist(nba$PTS,
      main = "Distribution of Points Per Game",
-     xlab = "PTS",
+     xlab = "PPG",
      col = "lightblue",
      border = "white")
 ```
@@ -24,7 +30,7 @@ boxplot(PTS ~ Pos,
         data = nba,
         main = "Points Per Game by Position",
         xlab = "Position",
-        ylab = "PTS",
+        ylab = "PPG",
         col = "lightgreen")
 ```
 
@@ -32,25 +38,17 @@ boxplot(PTS ~ Pos,
 plot(nba$MP, nba$PTS,
      main = "Minutes Played vs Points Per Game",
      xlab = "Minutes Played (MP)",
-     ylab = "Points (PTS)",
+     ylab = "Points (PPG)",
      pch = 19,
      col = "darkorange")
 ```
 
-```{r}
-avg_pts <- aggregate(PTS ~ Tm, data = nba, mean)
 
-barplot(avg_pts$PTS,
-        names.arg = avg_pts$Tm,
-        las = 2,
-        col = "steelblue",
-        main = "Average Points Per Game by Team")
-```
 
 ```{r}
 plot(density(nba$PTS, na.rm = TRUE),
      main = "Density of Points Per Game",
-     xlab = "PTS")
+     xlab = "PPG")
 ```
 The visualizations listed above are just a few of the categories we will be looking for in determining which player statistics are most strongly associated with high scoring performance, overall efficiency, and player value. We want to see how much team performance and statistics change a player’s value, whether the numeric values matter more or the percentage of the team stats matters more, and where do the top players most stand out as outliers and certain statistics. Currently we can see that team statistics do somewhat contribute to a player's success, although there is no direct correlation or causation for the claim. Durability and minutes player have a small impact, as players do need to play a lot of minutes to be highly productive players, but there isn’t a complete linear positive correlation for that claim. We also see that position doesn’t affect a player's value, as all positions have relatively the same average points per game. 
 We currently are working on much more simple variables, and have not gone through many, but by the end of this project, we will have multiple categories and layers of data matched together to help us find what makes a player most valuable. 
