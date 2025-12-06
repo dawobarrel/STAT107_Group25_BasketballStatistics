@@ -347,7 +347,7 @@ rmse_test
 
 
 
-As shown our RMSE for our training set is 38.3585 and for our testing set is 40.26133. As these values are very close together, this tells us that our model is not over fitting and is able to generalize to new unseen data.
+As shown our RMSE for our training set is 38.87785 and for our testing set is 40.26133. As these values are very close together, this tells us that our model is not over fitting and is able to generalize to new unseen data.
 
 The RMSE values being around ~40 indicates to us that on overage the model is able to predict the numerical ranking of players of within 40 places from their actual rank. While this may seem like a lot, this is to be expected as the numerical ranking of players is non-linear and many players have very similar stats. As such small differences in ranking may come from subjective or external factors that can not be explained purely through raw data. The results suggest that the model captures broad patterns in how player statistics relate to ranking, but we are limited by the complexity of external factors and their influences on ranking as well as the limitations in linear regression. While our model is not precise in rank prediction, it is useful in the understanding of general trends.
 
