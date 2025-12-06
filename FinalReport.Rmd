@@ -1,53 +1,71 @@
 ---
-title: "Final Project Report"
-output: html_document
-name: "Darrell Liu, Alejandro Leon, Kelvin Kim"
-date: "2025-11-08"
-
+title: 'Determinants of a Valuable Player: Analyzing Key Factors for Player and Team
+  Success'
+date: "2025-12-05" 
+author: "Darrell Liu, Alejandro Leon, Kelvin Kim"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(here)
+
+# Load cleaned dataset
+load(here::here("data", "nba2024_cleaned.RData"))
+
+# Load required libraries
+source(here::here("00_requirements.R"))
 ```
 
- Title and Abstract: 
 
-Analysis of 2024 NBA Player Statistics Using R
+# Abstract 
 
-This project investigates NBA player performance during the 2024 season using statistical tools in R. Our primary goal is to understand which player statistics are most strongly associated with high scoring performance, overall efficiency, and player value. We also examine patterns and distributions across common metrics such as points, rebounds, assists, and shooting percentages to identify broader trends in league-wide performance.
+  NBA player performance is influenced by a wide range of statistical, physical, and gameplay factors. The purpose of this study is to identify the most significant predictors of scoring performance and overall player efficiency during the 2024 NBA season, focusing on key factors such as steals, blocks, minutes played, points scored, shooting percentages, and other advanced efficiency metrics. Using data from nba2024.csv, we apply exploratory analysis and preliminary statistics modeling in order to examine how these variables relate to player performance across the NBA.
 
-Using the dataset nba2024.csv, which contains full-season statistics for all active players, we performed data cleaning, exploratory visualization, and preliminary statistical modeling. Our analysis highlights clear relationships between scoring and usage rates, efficiency measures such as True Shooting Percentage, and positional differences across the league. Initial results suggest that player efficiency metrics explain scoring performance better than traditional box score statistics alone.
+  Our results indicate that efficiency metrics such as shooting percentage and usage rate are the strongest predictors of scoring performance, showing a clear positive correlation. Traditional statistics such as rebounds and assists provide additional context but demonstrate weaker associations. Several variables such as scoring and steals required adjustments to address skewing and improve the model fit. In addition certain severely outlying player statistics had to be removed in order to prevent skewing of the model. These findings offer valuable insight for analysts, coaches, fans, and players themselves in order to highlight the metrics that most accurately reflect player value and on-court impact. 
 
-These findings lay the foundation for more advanced modeling, including regression-based prediction of scoring output and potential clustering of players by archetype. This work benefits analysts, coaches, and fans interested in understanding what drives on-court performance in the modern NBA.
-
-
-• Introduction:
-The purpose of this analysis is to explore and better understand the statistical drivers of player performance in the NBA during the 2024 season. Our central question is:
-“Which player statistics most strongly influence scoring and overall efficiency?”
-
-This analysis benefits basketball analysts, coaches, fantasy basketball participants, and anyone interested in data-driven sports insights. While we are not yet training a full predictive model, we are preparing the foundation for statistical modeling by examining variable behavior, relationships, and distribution patterns across the league. Through this project, we aim to identify meaningful performance trends and generate hypotheses for future modeling work, such as predicting high-value players.
-
-• Data:
-Our analysis uses the dataset nba2024.csv, which contains full-season statistics for NBA players during the 2024 season. The dataset includes variables such as points per game, rebounds, assists, minutes played, field goal percentage, three-point percentage, and advanced metrics where available. These data were retrieved from publicly available NBA statistics sources and compiled into a cleaned .csv file for the project.
-
-To prepare the dataset, we removed players with missing or incomplete statistical entries, standardized variable formats, and ensured that numeric fields were correctly encoded. No simulated data were used; the analysis is entirely based on real-world NBA statistics.
+Understanding these relationships supports more informed evaluation, prediction, and strategic decision making in the NBA for the future.
 
 
-• Visualization: Provide preliminary visualization in the form of histograms, density plots, scatter plots, box-plots, and numerical summaries of the data, depending on the type of analysis. What do these visualizations suggest about the hypothesis, model or simulation you are aiming to perform? If you are interested in including further visualization, describe them here.
+# Introduction
+  The purpose of this analysis is to explore and better understand the statistical drivers of player performance in the NBA during the 2024 season. Our central question is: “Which player statistics most strongly influence scoring and overall efficiency?”
 
-The visualizations listed above are just a few of the categories we will be looking for in determining which player statistics are most strongly associated with high scoring performance, overall efficiency, and player value. We want to see how much team performance and statistics change a player’s value, whether the numeric values matter more or the percentage of the team stats matters more, and where do the top players most stand out as outliers and certain statistics. Currently we can see that team statistics do somewhat contribute to a player's success, although there is no direct correlation or causation for the claim. Durability and minutes player have a small impact, as players do need to play a lot of minutes to be highly productive players, but there isn’t a complete linear positive correlation for that claim. We also see that position doesn’t affect a player's value, as all positions have relatively the same average points per game. 
-We currently are working on much more simple variables, and have not gone through many, but by the end of this project, we will have multiple categories and layers of data matched together to help us find what makes a player most valuable.
+  This analysis can benefit basketball analysts, coaches, fantasy basketball participants, and anyone interested in data-driven sports insights. While we are not yet training a full predictive model, we are preparing the foundation for statistical modeling by examining variable behavior, relationships, and distribution patterns across the league. Through this project, we aim to identify meaningful performance trends and generate hypotheses for future modeling work, such as predicting high-value players.
 
 
-• Analysis: 
-Our planned analysis will use statistical models and basic tests to explore the relationships seen in the visualizations. Specifically, we will:
+# Data
+  Our analysis uses the dataset nba2024.csv, which contains full-season statistics for NBA players during the 2024 season. The dataset includes variables such as points per game, rebounds, assists, minutes played, field goal percentage, three-point percentage, and advanced metrics where available. These data were retrieved from publicly available NBA statistics sources and compiled into a cleaned .csv file for the project.
 
-Use correlation analysis to check how scoring relates to efficiency metrics
+  To prepare the dataset, we removed players with missing or incomplete statistical entries, standardized variable formats, and ensured that numeric fields were correctly encoded. No simulated data were used; the analysis is entirely based on real-world NBA statistics.
 
-Build linear regression models to predict points based on traditional and advanced statistics
+# Visualizations
 
-Explore clustering to group players by playstyle or statistical profile
+  The visualizations displayed below are of the categories we will be looking for in determining which player statistics are most strongly associated with high scoring performance, overall efficiency, and player value. 
 
-Compare performance across positions or roles (e.g., starters vs. bench players)
+  We want to see how much team performance and statistics change a player’s value, whether the numeric values matter more or the percentage of the team stats matters more, and where do the top players most stand out as outliers and certain statistics. 
 
-We expect to find strong links between scoring and factors like minutes played, usage rate, and efficiency. Regression models should show that advanced efficiency metrics help explain scoring better than traditional box score stats alone. These analyses will guide the final modeling and insights in the full report.
+  Currently we can see that team statistics do somewhat contribute to a player's success, although there is no direct correlation or causation for the claim. Durability and minutes players have a small impact, as players do need to play a lot of minutes to be highly productive players, but there isn’t a complete linear positive correlation for that claim. We also see that position doesn’t affect a player's value, as all positions have relatively the same average points per game.
+  
+#Analysis
+```{r}
+nba <- nba2024
+```
+
+
+```{r}
+hist(nba$PTS,
+     main = "Distribution of Points Per Game",
+     xlab = "PPG",
+     col = "lightblue",
+     border = "white")
+```
+
+This histogram illustrates a right-skewed (positively skewed) distribution of Points Per Game (PPG). The shape indicates that the vast majority of NBA players fall into the lower scoring ranges, while only a small number of players achieve very high scoring averages, creating a long tail to the right. The median, or the most frequent range, is heavily concentrated between approximately 10 and 15 PPG, mostly representing the rotational players in the NBA.
+
+The distribution shows significant concentration in the lower-to-moderate scoring tiers, with the bulk of the data falling below 20 PPG. This high concentration highlights the fundamental structure of an NBA roster, where many players fulfill specialized, lower-scoring roles. However, the presence of bars extending toward 30 PPG represents the elite scorers and superstars, whose exceptionally high averages demonstrate the significant variability in scoring output across the league.
+
+
+
